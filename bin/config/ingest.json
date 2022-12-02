@@ -1,0 +1,7 @@
+{
+  "inputPath": "/data/openStreetMap/buildingsSample.csv",
+  "mainIndexTable": "buildingsSampleMain",
+  "secondaryIndexTable": "buildingsSampleSecondary",
+  "maxLevel": 31,
+  "recursiveTimes": 2
+}

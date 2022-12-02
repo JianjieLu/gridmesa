@@ -1,0 +1,28 @@
+syntax = "proto2";
+option java_package = "query.coprocessor.proto";
+option java_outer_classname = "TopologicalQueryCondition";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message QueryRequest {
+  repeated Range ranges = 1;
+  required bytes queryObjWKB = 2;
+  required bool isContain = 3;
+  required bool isRefine = 4;
+}
+
+message QueryResponse {
+  repeated bytes results = 1;
+}
+
+message Range {
+  required bytes rangeStart = 1;
+  required bytes rangeEnd = 2;
+  required bool isContained = 3;
+}
+
+service QueryService {
+  rpc query(QueryRequest)
+      returns (QueryResponse);
+}

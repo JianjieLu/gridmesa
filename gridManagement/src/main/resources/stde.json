@@ -1,0 +1,11 @@
+{
+  "inputPath": "/data/openStreetMap/linestrings_72M.csv",
+  "ingestTable": "linestringAll22",
+  "maxLevel": 22,
+  "maxNum": null,
+  "recursiveTimes": null,
+  "computeSubObject": true,
+  "queryTable": "",
+  "queryObj": "POLYGON((-114.50 42.00,-114.00 42.00, -114.00 42.50, -114.50 42.50,-114.50 42.00))",
+  "isContain": false
+}

@@ -1,0 +1,30 @@
+syntax = "proto2";
+
+option java_package = "query.protobuf";
+option java_outer_classname = "PointKnnCountCondition";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message CountRequest {
+    repeated CountRange ranges = 1;
+}
+
+message CountResponse {
+    required CountResult result = 1;
+}
+
+service CountService {
+    rpc query(CountRequest)
+    returns (CountResponse);
+}
+
+message CountRange {
+    required bytes rangeStart = 1;
+    required bytes rangeEnd = 2;
+}
+
+message CountResult{
+    required int32 count = 1;
+    repeated string ids = 2;
+}

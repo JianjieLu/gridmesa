@@ -1,0 +1,33 @@
+syntax = "proto2";
+option java_package = "query.coprocessor.proto";
+option java_outer_classname = "SRQueryCondition";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message QueryRequest {
+  repeated Range ranges = 1;
+  required Box queryBox = 2;
+}
+
+message QueryResponse {
+  repeated bytes trueHitId = 1;
+  repeated bytes candidateId = 2;
+}
+
+message Range {
+  required bytes rangeStart = 1;
+  required bytes rangeEnd = 2;
+}
+
+message Box {
+  required double minLon = 1;
+  required double minLat = 2;
+  required double maxLon = 3;
+  required double maxLat = 4;
+}
+
+service QueryService {
+  rpc query(QueryRequest)
+      returns (QueryResponse);
+}

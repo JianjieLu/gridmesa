@@ -1,0 +1,17 @@
+// step1: 写proto文件: 协处理器的输入输出参数
+// step2: 使用proto生成java文件.
+    // shell命令：需要装proto工具
+    protoc --proto_path= *.proto --java_out=./ // 输出地址在proto里面
+    // idea 配置proto工具，自动生成：需要查资料配置；
+// step3: 写EndPoint代码,服务端执行；
+// step4: 写调用代码，客户端执行
+// step5：把协处理器部署到hbase上
+    //在部署或者卸载协处理器前一定要disable table
+    disable 'tableName'
+    //部署协处理器
+    alter 'tableName', METHOD => 'table_att', 'coprocessor' =>'hdfs:///yxy/coprocessor/grid-analysis.jar|query.coprocessor.Endpoint|1073741823|'
+    // 卸载协处理器
+    alter 'tableName', METHOD => 'table_att_unset', NAME => 'coprocessor$1'
+    // 完成后enable
+    enable 'tableName'
+    // 注意：一个协处理器部署之后好像会加载到每个节点的本地，卸载之后重新部署时最好修改jar包名称(本地不确定会不会更新)

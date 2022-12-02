@@ -1,0 +1,7 @@
+{
+  "tableNamePrefix": "taxitest_1",
+  "inputPath": "hdfs:///data/NYCtaxi/yellow_tripdata_2010-01.csv",
+  "maxLevel": 22,
+  "maxNum": "Integer.MAX_VALUE",
+  "computeSubObject": "false"
+}

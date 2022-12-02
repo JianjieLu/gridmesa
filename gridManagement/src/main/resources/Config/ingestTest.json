@@ -1,0 +1,20 @@
+{
+  "bulkload_type": "stpoint_bulkload",
+  "ingest_table_name": "taxitest_1",
+  "input_path": "hdfs:///data/NYCtaxi/yellow_tripdata_2010-01.csv",
+  "max_level": "5",
+  "spark_conf": {
+    "spark.submit.deployMode": "client",
+    "spark.master": "yarn",
+    "spark.driver.memory": "1G",
+    "spark.executor.memory": "1G",
+    "spark.executor.instances": "3",
+    "spark.executor.cores": "4",
+    "spark.driver.extraClassPath": "/opt/module/spark-2.4.4/HBaseJar/*:/opt/module/hadoop-2.7.7/etc/hadoop/:/opt/module/hbase-1.4.9/conf/",
+    "spark.executor.extraClassPath": "/opt/module/spark-2.4.4/HBaseJar/*:/opt/module/hadoop-2.7.7/etc/hadoop/:/opt/module/hbase-1.4.9/conf/",
+    "spark.serializer": "org.apache.spark.serializer.KryoSerializer",
+    "spark.kryoserializer.buffer.max": "512m",
+    "spark.rpc.message.maxSize": "512",
+    "spark.driver.maxResultSize": "3G"
+  }
+}
