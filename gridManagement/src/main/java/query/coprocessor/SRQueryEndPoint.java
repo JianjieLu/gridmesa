@@ -4,7 +4,7 @@ import common.Constants;
 import geoobject.BoundingBox;
 import index.coding.spatial.geohash.GeoHash;
 import index.util.ByteArrayUtils;
-import query.coprocessor.proto.SRQueryCondition;
+import query.coprocessor.protobuf.SRQueryCondition;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.RpcCallback;
 import com.google.protobuf.RpcController;

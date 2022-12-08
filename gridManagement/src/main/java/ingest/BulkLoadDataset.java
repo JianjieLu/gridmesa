@@ -7,12 +7,15 @@ import geoobject.STGeometryTypeEnum;
 import geoobject.STPoint;
 import geoobject.geometry.Grid;
 import geoobject.geometry.GridGeometry;
+import geoobject.geometry.GridNonPoint;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.geotools.geometry.jts.JTS;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -66,11 +69,11 @@ public class BulkLoadDataset implements Serializable {
                                 .build();
 
                         byte[] byteSketch = serializesketch.getData();
-                        KeyValue geomKV = new KeyValue((rowKey),
+                        KeyValue geomKV = new KeyValue(rowKey,
                                 Bytes.toBytes(Constants.MAIN_INDEX_TABLE_FAMILY),
                                 Bytes.toBytes(Constants.MAIN_INDEX_TABLE_QUALIFIER_GEOM),
                                 bytePolygon);
-                        KeyValue sketchKV = new KeyValue((rowKey),
+                        KeyValue sketchKV = new KeyValue(rowKey,
                                 Bytes.toBytes(Constants.MAIN_INDEX_TABLE_FAMILY),
                                 Bytes.toBytes(Constants.MAIN_INDEX_TABLE_QUALIFIER_SKETCH),
                                 byteSketch);
@@ -94,7 +97,7 @@ public class BulkLoadDataset implements Serializable {
 
     }
 
-    public void bulkLoadToSecondaryIndexTable(Configuration conf, String tableNameStr, JavaRDD<GridGeometry> gridGeometryRDD) throws Exception{
+    public void bulkLoadToSecondaryIndexTable(Configuration conf, String tableNameStr, JavaRDD<GridGeometry> gridGeometryRDD,int secondaryLevel) throws Exception{
 
         JavaPairRDD<ImmutableBytesWritable, KeyValue> hFileRDD = gridGeometryRDD
                 .flatMapToPair(girdGeom -> {
@@ -105,8 +108,17 @@ public class BulkLoadDataset implements Serializable {
                         if (!geometry.disjoint(grid.getPolygon())){
                             String index = grid.getBinaryStrIndex();
                             int level = index.length()/2;
-                            long rowKey = Long.parseLong(index.substring(0, 20),2);
-                            indexMap.merge(rowKey, level, (a, b) -> Math.min(b, a));
+                            if (level<secondaryLevel) {
+                                GridNonPoint gridGeometry = new GridNonPoint(geometry, secondaryLevel);
+                                for (Grid tempGrid : gridGeometry.getSplitGrids()) {
+                                    long rowKey = tempGrid.getIndex();
+                                    indexMap.merge(rowKey, level, (a, b) -> Math.min(b, a));
+                                }
+                            } else {
+                                long rowKey = Long.parseLong(index.substring(0, secondaryLevel*2),2);
+                                indexMap.merge(rowKey, level, (a, b) -> Math.min(b, a));
+                            }
+
                         }
                     }
                     List<Tuple2<Long, Integer>> pairList = new ArrayList<>();
@@ -133,7 +145,6 @@ public class BulkLoadDataset implements Serializable {
                 .sortByKey();
         System.out.println("*************3:bulkloading SecondaryIndex size:"+hFileRDD.count());
         BulkloadUtil.bulkLoad(hFileRDD, conf, tableNameStr);
-
     }
 
     public String indexTrans(String index) {

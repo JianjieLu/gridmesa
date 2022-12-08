@@ -27,6 +27,11 @@ public class SerializeSketch {
                 .build();
     }
 
+    public static SerializeSketch fromByteArray(byte[] data) {
+        return new SerializeSketch.Builder(data)
+                .build();
+    }
+
     /**
      * 序列化MBR
      * @MBR 输入MBR

@@ -87,6 +87,12 @@ public class BoundingBox implements Serializable {
         }
     }
 
+    public BoundingBox getExtendBox() {
+        double detaLng = this.maxLng-this.minLng;
+        double detaLat = this.maxLat-this.minLat;
+        return new BoundingBox(this.minLng,this.minLat,this.maxLng+detaLng,this.maxLat+detaLat);
+    }
+
     public BoundingBox(Iterator<STPoint> stPoints) {
 
         if (stPoints.hasNext()) {

@@ -12,6 +12,11 @@ public class GridNonPoint extends GridGeometry {
         geomDecompose(geometry, recursiveTimes);
     }
 
+    public GridNonPoint(Geometry geometry){
+        super(geometry);
+        computeInitialGrids(geometry);;
+    }
+
     public GridNonPoint(Geometry geometry, int level){
         super("queryBox",geometry);
         computeGrids(geometry, level);

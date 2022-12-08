@@ -1,6 +1,6 @@
 package query.coprocessor;
 
-import query.coprocessor.proto.PointKnnCountCondition;
+import query.coprocessor.protobuf.PointKnnCountCondition;
 import index.coding.CodingUtil;
 import com.google.protobuf.RpcCallback;
 import com.google.protobuf.RpcController;

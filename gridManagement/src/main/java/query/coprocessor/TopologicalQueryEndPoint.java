@@ -1,7 +1,7 @@
 package query.coprocessor;
 
 import common.Constants;
-import query.coprocessor.proto.TopologicalQueryCondition;
+import query.coprocessor.protobuf.TopologicalQueryCondition;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.RpcCallback;
 import com.google.protobuf.RpcController;

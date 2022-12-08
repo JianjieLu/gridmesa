@@ -5,12 +5,6 @@ import org.locationtech.jts.geom.Point;
 
 public class GridPoint extends GridGeometry {
 
-    public GridPoint(Point point, int level) {
-        super(point);
-//        splitGeoms.add(new SplitGeometry(createGrid(point, level), false, id));
-        splitGeoms.add(new SplitGeometry(createGrid(point, level), point, id));
-    }
-
     public GridPoint(String id, Point point, int level) {
         super(id,point);
 //        splitGeoms.add(new SplitGeometry(createGrid(point, level), false, id));

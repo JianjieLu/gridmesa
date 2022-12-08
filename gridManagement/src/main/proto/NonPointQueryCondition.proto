@@ -1,0 +1,36 @@
+syntax = "proto2";
+option java_package = "query.coprocessor.protobuf";
+option java_outer_classname = "NonPointQueryCondition";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+
+message QueryRequest {
+    required BoundingBox queryBox = 1;
+    required BoundingBox extendBox = 2;
+    repeated Range ranges = 3;
+    required bool isPolyline = 4;
+    required int32 signatureSize = 5;
+}
+
+message QueryResponse {
+    repeated bytes results = 1;
+}
+
+message Range {
+    required bytes rangeStart = 1;
+    required bytes rangeEnd = 2;
+}
+
+message BoundingBox {
+    required double minLng = 1;
+    required double minLat = 2;
+    required double maxLng = 3;
+    required double maxLat = 4;
+}
+
+service QueryService {
+    rpc query(QueryRequest)
+    returns (QueryResponse);
+}

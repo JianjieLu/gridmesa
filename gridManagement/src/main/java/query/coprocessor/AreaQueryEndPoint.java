@@ -1,6 +1,6 @@
 package query.coprocessor;
 
-import query.coprocessor.proto.AreaQueryCondition;
+import query.coprocessor.protobuf.AreaQueryCondition;
 import serialize.SerializePolygon;
 import index.coding.spatial.geohash.GeoHash;
 import geoobject.BoundingBox;

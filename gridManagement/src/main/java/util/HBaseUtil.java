@@ -10,7 +10,7 @@ import org.apache.hadoop.hbase.filter.KeyOnlyFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
 import serialize.SerializeRowKey;
-
+import index.util.ByteArrayUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -278,7 +278,8 @@ public class HBaseUtil {
                 byte[] rowKey = result.getRow();
                 SerializeRowKey rowKeyNew = new SerializeRowKey.Builder(rowKey).build();
                 System.out.println("getId:"+Bytes.toString(rowKeyNew.getId()));
-                String XZ2Index = ByteArrayUtils.indexToBinaryString(rowKeyNew.getXZ2Index(),(int) rowKeyNew.getLevel()[0]);
+                int level = (int) rowKeyNew.getLevel()[0];
+                String XZ2Index = ByteArrayUtils.indexToBinaryString(rowKeyNew.getXZ2Index(),level*2);
                 System.out.println("XZ2Index:"+XZ2Index);
             }
             resultScanner.close();

@@ -1,50 +1,95 @@
-import geoobject.geometry.*;
+import geoobject.BoundingBox;
+import geoobject.geometry.Grid;
+import geoobject.geometry.GridNonPoint;
+import index.data.ByteArrayRange;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.WKTReader;
-import org.tukaani.xz.XZ;
-import serialize.SerializeRowKey;
-import serialize.SerializeSketch;
-import util.BitSetUtil;
-import util.ByteArrayUtils;
+import query.filter.NonPointFilter;
 
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collection;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class codingTest {
 
 
+    public static byte[] toByteArray(boolean isPolyline, int signatureSize, BoundingBox queryBox, BoundingBox extendBox) {
+        byte[] isPolylineByte = Bytes.toBytes(isPolyline);
+        byte[] signatureSizeByte = new byte[1];
+        signatureSizeByte[0] = (byte) signatureSize;
+        byte[] queryBoxByte = queryBox.toBytes();
+        byte[] extendBoxByte = extendBox.toBytes();
+        int bufferLength = isPolylineByte.length + signatureSizeByte.length + queryBoxByte.length+extendBoxByte.length+16;
+        ByteBuffer buf = ByteBuffer.allocate(bufferLength);
+        buf.putInt(isPolylineByte.length);
+        buf.put(isPolylineByte);
+        buf.putInt(signatureSizeByte.length);
+        buf.put(signatureSizeByte);
+        buf.putInt(queryBoxByte.length);
+        buf.put(queryBoxByte);
+        buf.putInt(extendBoxByte.length);
+        buf.put(extendBoxByte);
+        return buf.array();
+    }
 
-    public static void main(String[] args) throws ParseException, UnsupportedEncodingException, org.locationtech.jts.io.ParseException {
+    public static void parseFrom(final byte[] bytes) {
+        ByteBuffer buf = ByteBuffer.wrap(bytes);
+        byte[] isPolyline = new byte[buf.getInt()];
+        buf.get(isPolyline, 0, isPolyline.length);
+        byte[] signatureSize = new byte[buf.getInt()];
+        buf.get(signatureSize, 0, signatureSize.length);
+        byte[] queryBox = new byte[buf.getInt()];
+        buf.get(queryBox, 0, queryBox.length);
+        byte[] extendBox = new byte[buf.getInt()];
+        buf.get(extendBox, 0, extendBox.length);
+        BoundingBox queryBox1 = new BoundingBox(queryBox);
+        BoundingBox extendBox1 = new BoundingBox(extendBox);
+        int signatureSize1 = (int) signatureSize[0];
+        boolean isPolyline1 = Bytes.toBoolean(isPolyline);
+        System.out.println("queryBox1:"+queryBox1.toString());
+        System.out.println("extendBox1:"+extendBox1.toString());
+        System.out.println("signatureSize1:"+signatureSize1);
+        System.out.println("isPolyline1:"+isPolyline1);
+    }
+    
+    public static void main(String[] args) throws IOException {
 
-        WKTReader wktReader = new WKTReader();
-        String geometryWKT = "POLYGON ((13.3890342 52.5167309, 13.3890734 52.5164921, 13.3891163 52.5162306, 13.3894315 52.5162497, 13.3897060 52.5162664, 13.3900578 52.5162878, 13.3904777 52.5163133, 13.3906579 52.5163243, 13.3906017 52.5166665, 13.3905758 52.5168246, 13.3904208 52.5168152, 13.3901880 52.5168010, 13.3898523 52.5167806, 13.3894488 52.5167561, 13.3891471 52.5167378, 13.3890342 52.5167309))";
+        BoundingBox queryBox = new BoundingBox(13.3890342, 52.5167309, 13.4890342, 52.6167309);
+        BoundingBox extendBox = new BoundingBox(13.2890342, 52.4167309, 13.4890342, 52.6167309);
+        boolean isPolyline = false;
+        int signatureSize=8;
+        byte[] bytes = toByteArray(isPolyline, signatureSize, queryBox, extendBox);
+        parseFrom(bytes);
+//        getRanges1(box, 10);
+//        WKTReader wktReader = new WKTReader();
+//        String geometryWKT = "POLYGON ((13.3890342 52.5167309, 13.3890734 52.5164921, 13.3891163 52.5162306, 13.3894315 52.5162497, 13.3897060 52.5162664, 13.3900578 52.5162878, 13.3904777 52.5163133, 13.3906579 52.5163243, 13.3906017 52.5166665, 13.3905758 52.5168246, 13.3904208 52.5168152, 13.3901880 52.5168010, 13.3898523 52.5167806, 13.3894488 52.5167561, 13.3891471 52.5167378, 13.3890342 52.5167309))";
 //        String polygon="LINESTRING(-85.6482568 39.00405699999999,-85.648502 39.003826000000004,-85.648594 39.003759,-85.64874700000001 39.00373400000001,-85.649032 39.00375199999999,-85.649211 39.003725,-85.649633 39.003548999999964,-85.651228 39.00291300000001,-85.651326 39.00283400000001,-85.651462 39.00258600000001,-85.65157100000002 39.002463000000006,-85.651793 39.002329,-85.65211699999999 39.00218600000002,-85.652315 39.00213700000003,-85.652572 39.00213099999999,-85.65264499999999 39.002139)";
 //        String polygon="POLYGON ((-77.00448697253832 38.65929319700553, -76.95448697253832 38.65929319700553, -76.95448697253832 38.70929319700553, -77.00448697253832 38.70929319700553, -77.00448697253832 38.65929319700553))";
 //        String polygon="POLYGON((-75.0611686706543 39.75702659362287,-75.06116759776658 39.75699607625043,-75.06111314891541 39.756996282449705,-75.06111449001992 39.75702638741973,-75.0611686706543 39.75702659362287))";
 //        String polygon="POLYGON((-75.07309806346892 39.76094832423922,-75.07315921780173 39.76084605557688,-75.07305192944112 39.760803993432944,-75.0729854106903 39.760910385893595,-75.07309806346892 39.76094832423922))";
 //        String polygon="POLYGON ((13.7404253 51.0531853, 13.7401960 51.0532229, 13.7399074 51.0527668, 13.7398939 51.0527447, 13.7398689 51.0526946, 13.7398334 51.0525837, 13.7400300 51.0525574, 13.7401001 51.0525480, 13.7401783 51.0525353, 13.7403924 51.0525004, 13.7404538 51.0524907, 13.7405474 51.0524687, 13.7406320 51.0524486, 13.7408519 51.0524013, 13.7411055 51.0523423, 13.7411504 51.0524391, 13.7411585 51.0524570, 13.7411905 51.0526127, 13.7411993 51.0526632, 13.7412118 51.0527555, 13.7412266 51.0528641, 13.7412350 51.0530762, 13.7411485 51.0530888, 13.7407233 51.0531452, 13.7406739 51.0531517, 13.7406666 51.0531528, 13.7404253 51.0531853))";
-        int recursiveTimes = 4;
-        Geometry geometry = wktReader.read(geometryWKT);
-        GridGeometry gridGeometry = new GridNonPoint("test",geometry,recursiveTimes);
+//        int recursiveTimes = 4;
+//        Geometry geometry = wktReader.read(geometryWKT);
+//        GridGeometry gridGeometry = new GridNonPoint("test",geometry,recursiveTimes);
 //        Grid grid;
-//        grid = gridPolygon.getSplitGrids().get(0);
+//        grid = gridGeometry.getSplitGrids().get(0);
 //        System.out.println(grid.getBinaryStrIndex());
-//        String XZ2Index = gridPolygon.getXZ2Index();
+//        String XZ2Index = gridGeometry.getXZ2Index();
+//        String XZ2Index = "11100000110010011111111111";
 //        String objectID="123456";
 //        System.out.println("XZ2Index:"+XZ2Index+"\tlevel:"+ XZ2Index.length());
 //        SerializeRowKey serializeData = new SerializeRowKey.Builder().setXZ2Index(XZ2Index).setId(objectID).build();
 //        byte[] serializeRes = serializeData.getData();
-//        SerializeRowKey serializeData1 = new SerializeRowKey.Builder(serializeRes).build();
+//        SerializeRowKey serializeData1 = SerializeRowKey.fromByteArray(serializeRes);
+//        int level = (int) serializeData1.getLevel()[0];
 //
-//        System.out.println((int)serializeData1.getLevel()[0]);
-//        System.out.println(Bytes.toString(serializeData1.getId()));
-//        System.out.println(ByteArrayUtils.indexToBinaryString(serializeData1.getXZ2Index(), (int)serializeData1.getLevel()[0]));
+//        System.out.println("level:"+level);
+//        String indexBinary = ByteArrayUtils.indexToBinaryString(serializeData1.getXZ2Index(), level * 2);
+//        System.out.println("geomID:"+Bytes.toString(serializeData1.getId()));
+//        System.out.println("indexBinary:"+indexBinary+"\tlength:"+indexBinary.length());
+
 //        System.out.println("getSignature0:"+gridPolygon.getSignature());
 //        System.out.println("MBR0:"+geometry.getEnvelopeInternal().toString());
 //        SerializeSketch serializeRes = new SerializeSketch.Builder()
@@ -64,14 +109,14 @@ public class codingTest {
 //        //在将byte数组转回来
 //        bitSet = BitSetUtil.byteArray2BitSet(bytes);
 //        System.out.println("bitSet:"+bitSet);
-        Collection<Grid> grids = gridGeometry.getSplitGrids();
-        StringBuilder printRes = new StringBuilder("GEOMETRYCOLLECTION(");
-        printRes.append(geometryWKT);
-        for (Grid grid:grids){
-            printRes.append(",").append(grid.getPolygon());
-        }
-        printRes.append(")");
-        System.out.println(printRes.toString());
+//        Collection<Grid> grids = gridGeometry.getSplitGrids();
+//        StringBuilder printRes = new StringBuilder("GEOMETRYCOLLECTION(");
+//        printRes.append(geometryWKT);
+//        for (Grid grid:grids){
+//            printRes.append(",").append(grid.getPolygon());
+//        }
+//        printRes.append(")");
+//        System.out.println(printRes.toString());
 //        for (SplitGeometry grid:gridLine.getSplitGeoms()){
 //            System.out.println(grid.getGrid().getBinaryStrIndex()+" isFull:"+grid.isFull()+" Envelope:"+grid.getGrid().getEnvelope());
 //        }

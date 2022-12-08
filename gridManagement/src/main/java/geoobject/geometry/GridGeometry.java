@@ -27,15 +27,16 @@ public abstract class GridGeometry {
     protected BitSet signature;
 
     public GridGeometry(Geometry geometry) {
-        this.id = UUID.randomUUID().toString().replace("-","");
         this.geometry = geometry;
-        this.splitGeoms = new ArrayList<>();
+        this.splitGrids = new ArrayList<>();
     }
 
     public GridGeometry(String id,Geometry geometry) {
         this.id = id;
         this.geometry = geometry;
         this.splitGeoms = new ArrayList<>();
+        this.XZ2Grids = new HashMap<>();
+        this.splitGrids = new ArrayList<>();
     }
 
     /**
@@ -49,6 +50,7 @@ public abstract class GridGeometry {
         Envelope e = geometry.getEnvelopeInternal();
         // 确定初始层级;
         int initialLevel = (int) Math.floor(Math.log(360 / Math.max(e.getWidth(), e.getHeight() * 2)) / Math.log(2));
+        if (initialLevel>31) {return;}
         Z2SFC z2SFC = new Z2SFC(initialLevel);
         //MBR的左下角格网
         Grid leftBottom = new Grid(initialLevel, z2SFC.index(e.getMinX(), e.getMinY(), false));
@@ -58,6 +60,7 @@ public abstract class GridGeometry {
         Grid XZ2LeftBottom = leftBottom;
         //如果只有一个网格, 继续划分一级;
         if (leftBottom.getIndex() == rightTop.getIndex()){
+            if (initialLevel+1>31) {return;}
             z2SFC = new Z2SFC(initialLevel+1);
             XZ2LeftBottom = new Grid(initialLevel+1, z2SFC.index(e.getMinX(), e.getMinY(), false));
         }
@@ -84,6 +87,7 @@ public abstract class GridGeometry {
      * @return
      */
     public void computeSignature(Geometry geometry,int recursiveTimes){
+        if (XZ2Grids.size()==0) return;
         // 确定初始层级;
         int indexLevel = XZ2Index.length()/2;
         splitGrids = new ArrayList<>();
@@ -219,7 +223,7 @@ public abstract class GridGeometry {
         computeSignature(geometry,recursiveTimes);
     }
 
-    public int computeInitialLevel(Geometry geometry) {
+    public static int computeInitialLevel(Geometry geometry) {
         Envelope e = geometry.getEnvelopeInternal();
         // 确定初始层级;
         int initialLevel = (int) Math.floor(Math.log(360 / Math.max(e.getWidth(), e.getHeight() * 2)) / Math.log(2));

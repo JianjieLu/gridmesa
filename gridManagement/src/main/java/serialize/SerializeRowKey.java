@@ -3,7 +3,9 @@ package serialize;
 import constant.CommonConstants;
 import constant.ResourceParseConsts;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.ByteArrayUtils;
+import index.util.ByteArrayUtils;
+
+import java.io.Serializable;
 
 /**
  * 序列化rowKey：XZ2索引+ID.

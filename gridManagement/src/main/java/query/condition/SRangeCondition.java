@@ -22,6 +22,7 @@ public class SRangeCondition extends QueryCondition {
     private boolean isMultiThread;
     private int maxLevel;
     private int signatureSize;
+    private int secondaryIndexLevel;
 
     private SRangeCondition(STPoint bottomLeft, STPoint upperRight, int maxRecursive) {
         this.bottomLeft = bottomLeft;
@@ -37,11 +38,10 @@ public class SRangeCondition extends QueryCondition {
         this.maxRecursive = maxRecursive;
     }
 
-    private SRangeCondition(BoundingBox box, int signatureSize, boolean isPolyline) {
+    private SRangeCondition(BoundingBox box, boolean isPolyline) {
         this.bottomLeft = box.getLowerLeft();
         this.upperRight = box.getUpperRight();
         this.boundingBox = box;
-        this.signatureSize = signatureSize;
         this.isPolyline = isPolyline;
     }
 
@@ -54,7 +54,7 @@ public class SRangeCondition extends QueryCondition {
 
     public static SRangeCondition fromBox(BoundingBox box,
                                           boolean isPolyline) {
-        return new SRangeCondition(box,4,isPolyline);
+        return new SRangeCondition(box,isPolyline);
     }
 
     public STPoint getBottomLeft() {
@@ -78,6 +78,10 @@ public class SRangeCondition extends QueryCondition {
     public int getSignatureSize() {
         return signatureSize;
     }
+
+    public int getSecondaryIndexLevel() {
+        return secondaryIndexLevel;
+    }
     public boolean getIsMultiThread() {
         return isMultiThread;
     }
@@ -96,6 +100,10 @@ public class SRangeCondition extends QueryCondition {
 
     public void setSignatureSize(int signatureSize) {
         this.signatureSize = signatureSize;
+    }
+
+    public void setSecondaryIndexLevel(int secondaryIndexLevel) {
+        this.secondaryIndexLevel = secondaryIndexLevel;
     }
 
     public void setGetList(List<Get> getList) {

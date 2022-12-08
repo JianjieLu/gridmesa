@@ -1,7 +1,7 @@
 package query.coprocessor;
 
 import geodatabase.dataset.STFMetaData;
-import query.coprocessor.proto.PointQueryCondition;
+import query.coprocessor.protobuf.PointQueryCondition;
 import serialize.SerializePoint;
 import index.coding.Coding;
 import index.coding.CodingFactory;
